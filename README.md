@@ -240,13 +240,13 @@ The template includes an API Key authentication system and user management:
 
 ### REST API Endpoints
 
-| Method | Route | Public | Description |
-|--------|-------|--------|-------------|
-| `POST` | `/api/v1/auth/users` | Yes | Create user |
-| `GET` | `/api/v1/auth/users` | No | List users (cursor-paginated) |
-| `GET` | `/api/v1/auth/users/{id}` | No | Get user by ID |
-| `DELETE` | `/api/v1/auth/users/{id}` | No | Delete user |
-| `GET` | `/health` | Yes | Deep health check (DB verification) |
+| Method   | Route                     | Public | Description                         |
+| -------- | ------------------------- | ------ | ----------------------------------- |
+| `POST`   | `/api/v1/auth/users`      | Yes    | Create user                         |
+| `GET`    | `/api/v1/auth/users`      | No     | List users (cursor-paginated)       |
+| `GET`    | `/api/v1/auth/users/{id}` | No     | Get user by ID                      |
+| `DELETE` | `/api/v1/auth/users/{id}` | No     | Delete user                         |
+| `GET`    | `/health`                 | Yes    | Deep health check (DB verification) |
 
 ### CLI Commands (API Key Management)
 
@@ -266,7 +266,7 @@ make cli args="auth deactivate-api-key --user-id <uuid> --api-key <key>"
 - `POST /api/v1/auth/users` is public (needed to create the first user).
 - `GET /health` is public (needed for load balancers/orchestrators).
 
-```
+````
 
 ## 🗄️ Database
 
@@ -356,6 +356,15 @@ Structured logging with Loguru:
 - Configurable log levels
 - JSON formatting for production
 - Console formatting for development
+
+## 🤖 AI Agent Configuration
+
+The project ships a committed agent configuration so every clone inherits it:
+
+- **`AGENTS.md`** — canonical instructions, read by all AI coding agents. `CLAUDE.md` re-exports it for Claude Code (`@AGENTS.md`).
+- **`.claude/rules/`** — path-scoped guidance (architecture, coding principles, naming, testing, migrations, git) that loads automatically when editing matching files.
+- **`.claude/settings.json`** — shared permissions (denies destructive git ops and reading `secrets/.env`) plus hooks that auto-run `ruff` format + lint on edit. Machine-specific overrides go in the gitignored `.claude/settings.local.json`.
+- **`.worktreeinclude`** — copies `secrets/` into new worktrees created with `claude --worktree <name>`.
 
 ## Roadmap
 
