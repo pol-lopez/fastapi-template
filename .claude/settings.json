@@ -1,0 +1,80 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make test*)",
+      "Bash(make fmt*)",
+      "Bash(make lint*)",
+      "Bash(make all*)",
+      "Bash(make migration-history*)",
+      "Bash(make migration-current*)",
+      "Bash(make migration-show*)",
+      "Bash(ruff check*)",
+      "Bash(ruff format*)",
+      "Bash(uv run ruff*)",
+      "Bash(pytest*)",
+      "Bash(uv run pytest*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git add*)",
+      "Bash(git check-ignore*)",
+      "Read(secrets/.env.example)",
+      "Edit(secrets/.env.example)",
+      "Write(secrets/.env.example)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(*--no-verify*)",
+      "Bash(git push*origin main*)",
+      "Bash(git push*--force*)",
+      "Bash(git push*-f*)",
+      "Bash(git push*--force-with-lease*)",
+      "Bash(git reset --hard*)",
+      "Bash(git checkout -- .)",
+      "Bash(git restore .)",
+      "Bash(git clean -f*)",
+      "Read(secrets/.env)",
+      "Read(.env)",
+      "Edit(secrets/.env)",
+      "Write(secrets/.env)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset:*)",
+      "Bash(git worktree add:*)",
+      "Bash(git worktree remove:*)",
+      "Bash(git stash:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run ruff format src tests >/dev/null 2>&1; uv run ruff check --fix src tests >/dev/null 2>&1; exit 0",
+            "timeout": 60,
+            "statusMessage": "ruff format + check --fix"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git diff --quiet && git diff --cached --quiet || (uv run ruff format src tests >/dev/null 2>&1; uv run ruff check src tests --fix >/dev/null 2>&1)"
+          }
+        ]
+      }
+    ]
+  }
+}
