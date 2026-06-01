@@ -13,8 +13,8 @@ wheels/
 
 .ruff_cache/
 
-AGENTS.md
-.claude/
+.claude/settings.local.json
+.claude/worktrees/
 .DS_Store
 
 # AI-generated plans and specs
