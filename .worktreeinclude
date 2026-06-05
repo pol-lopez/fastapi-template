@@ -1,0 +1,3 @@
+# Gitignored paths copied into new Claude Code worktrees (.gitignore syntax).
+# See: claude --worktree <name>
+secrets/
