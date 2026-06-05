@@ -10,6 +10,7 @@
   "pre-commit": {
     "enabled": true
   },
+  "platformAutomerge": false,
   "labels": ["dependencies"],
   "timezone": "Europe/Madrid",
   "schedule": ["after 9am on monday"],
