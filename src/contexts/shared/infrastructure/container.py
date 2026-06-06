@@ -1,8 +1,12 @@
+import redis.asyncio as redis
 from dependency_injector import containers, providers
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.contexts.shared.application.use_cases.check_health import CheckHealthUseCase
-from src.contexts.shared.infrastructure.cache import InMemoryCacheClient
+from src.contexts.shared.infrastructure.cache import RedisCacheClient
+from src.contexts.shared.infrastructure.cache.redis_health_checker import (
+    RedisHealthChecker,
+)
 from src.contexts.shared.infrastructure.events.in_memory_event_bus import (
     InMemoryEventBus,
 )
@@ -29,8 +33,15 @@ class SharedContainer(containers.DeclarativeContainer):
         expire_on_commit=False,
     )
 
+    redis_client = providers.Singleton(
+        redis.from_url,
+        url=settings.redis_url,
+        decode_responses=True,
+    )
+
     cache_client = providers.Singleton(
-        InMemoryCacheClient,
+        RedisCacheClient,
+        client=redis_client,
     )
 
     event_bus = providers.Singleton(
@@ -42,7 +53,13 @@ class SharedContainer(containers.DeclarativeContainer):
         session_factory=session_factory,
     )
 
+    cache_health_checker = providers.Factory(
+        RedisHealthChecker,
+        client=redis_client,
+    )
+
     check_health_use_case = providers.Factory(
         CheckHealthUseCase,
         database_checker=database_health_checker,
+        cache_checker=cache_health_checker,
     )

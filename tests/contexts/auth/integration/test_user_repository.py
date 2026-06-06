@@ -3,6 +3,7 @@ from uuid import uuid4
 import pytest
 
 from src.container import ApplicationContainer
+from src.contexts.auth.domain.aggregates import ApiKey
 from src.contexts.auth.domain.repositories import UserRepository
 from src.contexts.auth.domain.services import ApiKeyHasher
 from src.contexts.shared.domain.pagination import CursorParams
@@ -124,6 +125,20 @@ class TestUserRepositoryCache:
 
         cached = await cache_client.get(f"api_key:{key_hash}")
         assert cached is not None
+
+    async def test_save_caches_api_key_as_serialized_json(
+        self,
+        user_repository: UserRepository,
+        cache_client: InMemoryCacheClient,
+    ) -> None:
+        user, plain_key = UserFactory.with_api_key()
+        await user_repository.save(user)
+        key_hash = ApiKeyHasher.hash(plain_key)
+
+        cached = await cache_client.get(f"api_key:{key_hash}")
+
+        assert isinstance(cached, str)
+        assert ApiKey.model_validate_json(cached).key_hash == key_hash
 
     async def test_cache_invalidation_on_delete(
         self,

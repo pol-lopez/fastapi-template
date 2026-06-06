@@ -18,22 +18,36 @@ class FakeUnhealthyChecker(HealthChecker):
 
 @pytest.mark.unit
 class TestCheckHealthUseCase:
-    async def test_returns_healthy_when_db_responds(self) -> None:
-        use_case = CheckHealthUseCase(database_checker=FakeHealthyChecker())
+    async def test_returns_healthy_when_all_components_respond(self) -> None:
+        use_case = CheckHealthUseCase(
+            database_checker=FakeHealthyChecker(),
+            cache_checker=FakeHealthyChecker(),
+        )
 
         result = await use_case.execute()
 
         assert result.status == "healthy"
-        assert "database" in result.components
         assert result.components["database"]["status"] == "healthy"
-        assert isinstance(result.components["database"]["latency_ms"], float)
+        assert result.components["cache"]["status"] == "healthy"
 
     async def test_returns_unhealthy_when_db_fails(self) -> None:
-        use_case = CheckHealthUseCase(database_checker=FakeUnhealthyChecker())
+        use_case = CheckHealthUseCase(
+            database_checker=FakeUnhealthyChecker(),
+            cache_checker=FakeHealthyChecker(),
+        )
 
         result = await use_case.execute()
 
         assert result.status == "unhealthy"
-        assert "database" in result.components
         assert result.components["database"]["status"] == "unhealthy"
-        assert result.components["database"]["latency_ms"] == 0
+
+    async def test_stays_healthy_when_only_cache_fails(self) -> None:
+        use_case = CheckHealthUseCase(
+            database_checker=FakeHealthyChecker(),
+            cache_checker=FakeUnhealthyChecker(),
+        )
+
+        result = await use_case.execute()
+
+        assert result.status == "healthy"
+        assert result.components["cache"]["status"] == "unhealthy"

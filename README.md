@@ -11,7 +11,8 @@ A production-ready FastAPI template implementing Domain-Driven Design (DDD) and 
 - **CLI Commands**: Typer-based administrative CLI for user and API key management
 - **Domain Events**: Synchronous in-process event bus with subscriber pattern
 - **Rate Limiting**: Sliding window rate limiter middleware (per-IP, configurable)
-- **Deep Health Check**: `/health` endpoint verifies database connectivity with latency reporting
+- **Distributed Cache**: Redis-backed cache (`RedisCacheClient`) with graceful degradation; `InMemoryCacheClient` used as the test double
+- **Deep Health Check**: `/health` endpoint verifies database and Redis connectivity with latency reporting
 - **Database Management**:
   - PostgreSQL 18 with async SQLAlchemy
   - Alembic for database migrations
@@ -34,6 +35,7 @@ A production-ready FastAPI template implementing Domain-Driven Design (DDD) and 
 - [uv](https://github.com/astral-sh/uv) - Fast Python package installer (used locally and in Docker)
 - Docker & Docker Compose (for containerized deployment)
 - PostgreSQL 18+ (handled by Docker Compose)
+- Redis 8+ (handled by Docker Compose)
 
 ## 🏗️ Project Structure
 
@@ -240,13 +242,13 @@ The template includes an API Key authentication system and user management:
 
 ### REST API Endpoints
 
-| Method   | Route                     | Public | Description                         |
-| -------- | ------------------------- | ------ | ----------------------------------- |
-| `POST`   | `/api/v1/auth/users`      | Yes    | Create user                         |
-| `GET`    | `/api/v1/auth/users`      | No     | List users (cursor-paginated)       |
-| `GET`    | `/api/v1/auth/users/{id}` | No     | Get user by ID                      |
-| `DELETE` | `/api/v1/auth/users/{id}` | No     | Delete user                         |
-| `GET`    | `/health`                 | Yes    | Deep health check (DB verification) |
+| Method   | Route                     | Public | Description                    |
+| -------- | ------------------------- | ------ | ------------------------------ |
+| `POST`   | `/api/v1/auth/users`      | Yes    | Create user                    |
+| `GET`    | `/api/v1/auth/users`      | No     | List users (cursor-paginated)  |
+| `GET`    | `/api/v1/auth/users/{id}` | No     | Get user by ID                 |
+| `DELETE` | `/api/v1/auth/users/{id}` | No     | Delete user                    |
+| `GET`    | `/health`                 | Yes    | Deep health check (DB + Redis) |
 
 ### CLI Commands (API Key Management)
 
@@ -347,6 +349,7 @@ log_level = settings.log_level
 - **Security**: `secret_key`, `allowed_origins`
 - **Rate Limiting**: `rate_limit_requests` (default: 100), `rate_limit_window_seconds` (default: 60), `rate_limit_exclude_paths` (default: `["/health"]`)
 - **Database**: `database_url`
+- **Redis**: `redis_url` (default: `redis://localhost:6379/0`)
 
 ## 📝 Logging
 
@@ -370,7 +373,6 @@ The project ships a committed agent configuration so every clone inherits it:
 
 Planned improvements for future development:
 
-- [ ] **Redis Cache** — Replace InMemoryCacheClient with Redis for distributed caching
 - [ ] **JWT Authentication** — Token-based auth for user sessions alongside API keys
 - [ ] **Prometheus Metrics** — `/metrics` endpoint for application observability
 - [ ] **OpenTelemetry Tracing** — Distributed tracing for request flows

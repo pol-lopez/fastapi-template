@@ -19,6 +19,7 @@ dependencies = [
     "loguru>=0.7.3",
     "psutil>=7.1.1",
     "pydantic-settings>=2.11.0",
+    "redis>=6.4.0",
     "sqlalchemy>=2.0.44",
     "typer>=0.19.2",
 ]

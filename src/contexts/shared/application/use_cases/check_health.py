@@ -10,13 +10,20 @@ class HealthResult:
 
 
 class CheckHealthUseCase:
-    def __init__(self, database_checker: HealthChecker) -> None:
+    def __init__(
+        self, database_checker: HealthChecker, cache_checker: HealthChecker
+    ) -> None:
         self.database_checker = database_checker
+        self.cache_checker = cache_checker
 
     async def execute(self) -> HealthResult:
         result = HealthResult()
+
         db_status = await self.database_checker.check()
         result.components["database"] = db_status
         if db_status["status"] == "unhealthy":
             result.status = "unhealthy"
+
+        result.components["cache"] = await self.cache_checker.check()
+
         return result
