@@ -11,3 +11,4 @@ class TestHealthEndpoint:
         body = response.json()
         assert body["status"] == "healthy"
         assert "database" in body["components"]
+        assert "cache" in body["components"]

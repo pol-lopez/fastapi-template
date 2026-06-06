@@ -35,6 +35,10 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     try:
         yield
     finally:
+        try:
+            await container.shared_container.redis_client().aclose()
+        except Exception as exc:
+            logger.warning("Failed to close Redis client on shutdown: {}", exc)
         container.unwire()
         logger.complete()
 

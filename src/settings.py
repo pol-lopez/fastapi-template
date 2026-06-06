@@ -52,19 +52,11 @@ class Settings(BaseSettings):
         description="Database connection URL",
     )
 
-    # Redis Settings (example)
-    # redis_host: str = Field(
-    #     default="localhost",
-    #     description="Redis host",
-    # )
-    # redis_port: int = Field(
-    #     default=6379,
-    #     description="Redis port",
-    # )
-    # redis_password: SecretStr | None = Field(
-    #     default=None,
-    #     description="Redis password",
-    # )
+    # Redis Settings
+    redis_url: str = Field(
+        default="redis://localhost:6379/0",
+        description="Redis connection URL",
+    )
 
     # Feature Flags (example)
     # enable_metrics: bool = Field(

@@ -20,6 +20,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      redis:
+        condition: service_healthy
   database:
     image: postgres:18-trixie
     container_name: fastapi-template-database
@@ -36,5 +38,17 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+  redis:
+    image: redis:8-alpine
+    container_name: fastapi-template-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
 volumes:
   pgdata:
