@@ -6,24 +6,21 @@ from src.contexts.shared.domain.cache_client import CacheClient
 
 class InMemoryCacheClient(CacheClient):
     def __init__(self) -> None:
-        self._cache: dict[str, dict[str, object]] = {}
+        self._cache: dict[str, tuple[str, float]] = {}
         self._lock = asyncio.Lock()
 
-    async def set(self, key: str, value: object, ttl: int = 600) -> None:
+    async def set(self, key: str, value: str, ttl: int = 600) -> None:
         async with self._lock:
-            self._cache[key] = {
-                "value": value,
-                "expires_at": (
-                    datetime.now(tz=UTC) + timedelta(seconds=ttl)
-                ).timestamp(),
-            }
+            expires_at = (datetime.now(tz=UTC) + timedelta(seconds=ttl)).timestamp()
+            self._cache[key] = (value, expires_at)
 
-    async def get(self, key: str) -> object | None:
+    async def get(self, key: str) -> str | None:
         async with self._lock:
             item = self._cache.get(key)
             if item:
-                if item["expires_at"] > datetime.now(tz=UTC).timestamp():
-                    return item["value"]
+                value, expires_at = item
+                if expires_at > datetime.now(tz=UTC).timestamp():
+                    return value
                 self._cache.pop(key, None)
             return None
 
