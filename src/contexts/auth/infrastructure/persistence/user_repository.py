@@ -63,7 +63,9 @@ class UserSQLAlchemyRepository(UserRepository):
                         new_api_key = ApiKeyModel.from_domain(api_key)
                         session.add(new_api_key)
 
-                    await self.cache_client.set(f"api_key:{api_key.key_hash}", api_key)
+                    await self.cache_client.set(
+                        f"api_key:{api_key.key_hash}", api_key.model_dump_json()
+                    )
             else:
                 user_model = UserModel(
                     user_id=str(user.user_id),
@@ -79,7 +81,9 @@ class UserSQLAlchemyRepository(UserRepository):
                 for api_key in user.api_keys:
                     api_key_model = ApiKeyModel.from_domain(api_key)
                     session.add(api_key_model)
-                    await self.cache_client.set(f"api_key:{api_key.key_hash}", api_key)
+                    await self.cache_client.set(
+                        f"api_key:{api_key.key_hash}", api_key.model_dump_json()
+                    )
 
             await session.commit()
 
@@ -202,7 +206,7 @@ class UserSQLAlchemyRepository(UserRepository):
     async def find_api_key_by_hash(self, key_hash: str) -> ApiKey | None:
         cached_api_key = await self.cache_client.get(f"api_key:{key_hash}")
         if cached_api_key:
-            return cached_api_key
+            return ApiKey.model_validate_json(cached_api_key)
 
         async with self.session_factory() as session:
             result = await session.execute(
@@ -212,6 +216,8 @@ class UserSQLAlchemyRepository(UserRepository):
 
             if model:
                 api_key_domain = model.to_domain()
-                await self.cache_client.set(f"api_key:{key_hash}", api_key_domain)
+                await self.cache_client.set(
+                    f"api_key:{key_hash}", api_key_domain.model_dump_json()
+                )
                 return api_key_domain
             return None
