@@ -48,10 +48,12 @@ src/contexts/<context>/
 
 ## Caching
 
-- Abstract interface: `CacheClient` at `src/contexts/shared/domain/cache_client.py`.
-- Current implementation: `InMemoryCacheClient` with TTL-based expiry (default 600s).
-- Cache key pattern: `api_key:{key}`.
-- Repositories receive `cache_client` via DI — check cache before DB, populate cache after DB fetch.
+- Abstract interface: `CacheClient` at `src/contexts/shared/domain/cache_client.py` — a string store (`get`/`set`/`delete`/`clear`).
+- Production implementation: `RedisCacheClient` (`src/contexts/shared/infrastructure/cache/redis_cache_client.py`), backed by `redis.asyncio`. Keys are namespaced under a prefix; Redis errors degrade gracefully (logged warning, `get` returns `None`, writes become no-ops).
+- Test double: `InMemoryCacheClient` (TTL-based dict), injected via `override_container` in tests.
+- Callers serialize: repositories store `model_dump_json()` and read back with `Model.model_validate_json(...)`.
+- Cache key pattern: `api_key:{key_hash}` (default 600s TTL).
+- Configured via `REDIS_URL`; reported as a soft component in `/health` (the database is the only hard dependency).
 
 ## Public Route Decorator
 
