@@ -22,7 +22,7 @@ A production-ready FastAPI template implementing Domain-Driven Design (DDD) and 
   - Ruff for linting and formatting (configured with extensive rule sets)
   - Pre-commit hooks
   - Type hints targeting Python 3.14
-- **Structured Logging**: Loguru integration with request/response middleware
+- **Structured Logging**: Loguru-based wide events — one canonical, queryable log line per request with request-id correlation (JSON in production)
 - **Settings Management**: Pydantic Settings with environment-based configuration
 - **Production Ready**:
   - Multi-stage Docker builds
@@ -345,7 +345,7 @@ log_level = settings.log_level
 
 ### Available Settings
 
-- **Application**: `environment`, `log_level`
+- **Application**: `environment`, `log_level`, `log_format` (`console` | `json`, default `console`; set `json` in staging/production for structured wide-event logs)
 - **Security**: `secret_key`, `allowed_origins`
 - **Rate Limiting**: `rate_limit_requests` (default: 100), `rate_limit_window_seconds` (default: 60), `rate_limit_exclude_paths` (default: `["/health"]`)
 - **Database**: `database_url`
@@ -353,12 +353,50 @@ log_level = settings.log_level
 
 ## 📝 Logging
 
-Structured logging with Loguru:
+The template uses **structured logging** (Loguru) built around **wide events**: every HTTP request emits **one canonical log line** carrying the full context of what happened — meant to be queried, not grepped.
 
-- Request/response logging middleware
-- Configurable log levels
-- JSON formatting for production
-- Console formatting for development
+### Output format
+
+Controlled by `LOG_FORMAT` (env var / `settings.log_format`):
+
+- `console` (default) — human-readable, colorized; for local development.
+- `json` — one flat JSON object per line; for staging/production (set `LOG_FORMAT=json`).
+
+`LOG_LEVEL` controls verbosity (default `INFO`). Outside development, Loguru's `diagnose` is disabled so tracebacks never leak local variable values.
+
+### The canonical request line
+
+The request middleware emits one line per request automatically — you wire nothing. Each event includes `request_id`, `method`, `path`, `route`, `status_code`, `duration_ms`, `outcome`, `client_ip`, `user_agent`, and (once authenticated) `user_id` and `api_key_id`. In development it also adds RAM deltas (`ram_start_mb`, `ram_end_mb`, `ram_delta_mb`). The level scales with the outcome: `5xx → ERROR`, `4xx → WARNING`, else `INFO`. The line is emitted even when the request raises.
+
+Example (`LOG_FORMAT=json`):
+
+```json
+{"timestamp": "2026-06-06T14:41:57+02:00", "level": "INFO", "logger": "src.contexts.shared.infrastructure.logger.middleware", "message": "GET /api/v1/auth/users -> 200 (3.41ms)", "request_id": "0b9c1f2e-...", "method": "GET", "path": "/api/v1/auth/users", "route": "/api/v1/auth/users", "status_code": 200, "duration_ms": 3.41, "outcome": "ok", "client_ip": "127.0.0.1", "user_agent": "curl/8.4.0", "user_id": "a1b2...", "api_key_id": "c3d4..."}
+```
+
+### Request correlation (free)
+
+Any `logger.*` call made while handling a request automatically inherits that request's context (`request_id`, identity) — no plumbing needed, including in the domain/application layers:
+
+```python
+from loguru import logger
+
+logger.info("charge captured")  # emitted with request_id + user_id already attached
+```
+
+The request id is read from an inbound `X-Request-ID` header (or generated if absent) and echoed back in the response `X-Request-ID` header, so you can correlate client, logs, and downstream services.
+
+### Adding your own high-cardinality context
+
+To enrich the wide event with extra fields, call `bind_context(...)`. It lives in the **infrastructure layer**, so call it from infrastructure code (HTTP middleware, dependencies, event subscribers) — the same way the auth dependency attaches `user_id`/`api_key_id`:
+
+```python
+from src.contexts.shared.infrastructure.logger import bind_context
+
+bind_context(tenant_id=str(tenant_id), plan="premium")
+```
+
+Whatever you bind lands on the request's canonical line and on every log emitted afterwards in that request. **Never log secrets** — the raw `X-API-Key` is deliberately never bound or stored; only `user_id`/`api_key_id` are.
 
 ## 🤖 AI Agent Configuration
 
