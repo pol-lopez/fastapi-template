@@ -16,7 +16,6 @@ updates:
       include: "scope"
     cooldown:
       default-days: 3
-      semver-major-days: 7
     groups:
       python-minor-patch:
         applies-to: version-updates
@@ -38,7 +37,6 @@ updates:
       include: "scope"
     cooldown:
       default-days: 3
-      semver-major-days: 7
     groups:
       docker-minor-patch:
         applies-to: version-updates
@@ -60,7 +58,6 @@ updates:
       include: "scope"
     cooldown:
       default-days: 3
-      semver-major-days: 7
     groups:
       docker-compose-minor-patch:
         applies-to: version-updates
@@ -87,25 +84,3 @@ updates:
         applies-to: version-updates
         patterns:
           - "*"
-  - package-ecosystem: "pre-commit"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Madrid"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    cooldown:
-      default-days: 3
-      semver-major-days: 7
-    groups:
-      pre-commit-minor-patch:
-        applies-to: version-updates
-        update-types:
-          - "minor"
-          - "patch"
