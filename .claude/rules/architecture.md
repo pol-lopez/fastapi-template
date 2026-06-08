@@ -1,5 +1,5 @@
 ---
-description: Hexagonal DDD architecture patterns, DI container, repository pattern, caching, and public route decorator
+description: Hexagonal DDD architecture patterns, DI container, repository pattern, caching, logging, and public route decorator
 paths: ["src/contexts/**"]
 ---
 
@@ -81,3 +81,12 @@ src/contexts/<context>/
 - All state-mutating methods must update `self.updated_at = datetime.now(UTC)`.
 - Use imperative verb form: `revoke_api_key`, not `revoked_api_key`.
 - Factory methods use `@staticmethod` named `create(...)`.
+
+## Logging & Observability
+
+- **Structured wide events**: the HTTP middleware (`logger/middleware.py`) emits ONE canonical log line per request with full context (`request_id`, `method`, `path`, `route`, `status_code`, `duration_ms`, `outcome`, `client_ip`, `user_agent`, plus identity once authenticated). Level scales with outcome (5xx→ERROR, 4xx→WARNING, else INFO). Emitted even when the request raises.
+- **Request context accumulator** (`logger/request_context.py`): a request-scoped dict in a `ContextVar`, merged into every log record's `extra` by a loguru patcher. `init_context` seeds it (middleware), `bind_context(**fields)` adds high-cardinality fields, `get_context` reads it. `bind_context` MUTATES in place (never reassigns) so fields added in `BaseHTTPMiddleware` child tasks reach the middleware at emit time.
+- **Where to enrich**: call `bind_context(...)` from the **infrastructure layer** (middleware, HTTP dependencies, event subscribers) — never from domain/application (that would import infra). Example: `verify_api_key` binds `user_id`/`api_key_id`.
+- **Free correlation**: any `logger.*` call during a request automatically carries `request_id` + identity via the patcher — domain/application code just logs normally.
+- **Output**: `LOG_FORMAT=console` (human-readable, dev) or `json` (flat structured wide events, staging/prod). loguru `diagnose` is enabled only in development (no variable-value leakage in prod tracebacks).
+- **Never log secrets**: the raw API key is never bound or stored — only `user_id`/`api_key_id`.
