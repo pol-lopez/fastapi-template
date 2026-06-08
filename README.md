@@ -324,6 +324,19 @@ docker compose build --build-arg INSTALL_DEV=true
 docker compose build --build-arg INSTALL_DEV=false
 ```
 
+### Parallel Worktrees
+
+Container names are derived from the Compose project (the worktree directory), so multiple git worktrees can run their own stacks side by side. To avoid host-port collisions, override the host ports in each worktree's `secrets/.env`:
+
+```bash
+# e.g. in a second worktree
+APP_HOST_PORT=8081
+DB_HOST_PORT=5433
+REDIS_HOST_PORT=6380
+```
+
+Internal service URLs (`DATABASE_URL`, `REDIS_URL`) point at the Compose service names and are unaffected by these host-port overrides.
+
 ## ⚙️ Configuration
 
 Configuration is managed through `src/settings.py` using Pydantic Settings:
