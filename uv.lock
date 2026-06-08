@@ -370,7 +370,7 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "bcrypt", specifier = ">=5.0.0" },
     { name = "dependency-injector", specifier = ">=4.48.2" },
-    { name = "fastapi", extras = ["standard"], specifier = ">=0.119.1" },
+    { name = "fastapi", extras = ["standard"], specifier = ">=0.136.3" },
     { name = "greenlet", specifier = ">=3.2.4" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "psutil", specifier = ">=7.1.1" },
