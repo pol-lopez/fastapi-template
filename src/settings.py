@@ -22,6 +22,12 @@ class Settings(BaseSettings):
         default="INFO",
         description="Logging level",
     )
+    log_format: Literal["console", "json"] = Field(
+        default="console",
+        description=(
+            "Log output format: 'console' (human-readable) or 'json' (structured)"
+        ),
+    )
 
     # Security Settings
     secret_key: SecretStr = Field(
