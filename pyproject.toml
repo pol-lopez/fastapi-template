@@ -32,12 +32,12 @@ packages = ["src"]
 
 [dependency-groups]
 dev = [
-    "faker>=40.21.0",
+    "faker>=40.23.0",
     "pre-commit>=4.3.0",
     "pytest>=9.0.2",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.15.16",
+    "ruff>=0.15.17",
 ]
 
 [tool.ruff]
