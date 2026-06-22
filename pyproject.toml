@@ -13,14 +13,14 @@ dependencies = [
     "alembic>=1.17.0",
     "asyncpg>=0.30.0",
     "bcrypt>=5.0.0",
-    "dependency-injector>=4.48.2",
+    "dependency-injector>=4.49.1",
     "fastapi[standard]>=0.136.3",
-    "greenlet>=3.2.4",
+    "greenlet>=3.5.2",
     "loguru>=0.7.3",
     "psutil>=7.1.1",
     "pydantic-settings>=2.11.0",
     "redis>=6.4.0",
-    "sqlalchemy>=2.0.44",
+    "sqlalchemy>=2.0.51",
     "typer>=0.26.7",
 ]
 
@@ -34,10 +34,10 @@ packages = ["src"]
 dev = [
     "faker>=40.23.0",
     "pre-commit>=4.3.0",
-    "pytest>=9.0.2",
+    "pytest>=9.1.0",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.15.17",
+    "ruff>=0.15.18",
 ]
 
 [tool.ruff]
