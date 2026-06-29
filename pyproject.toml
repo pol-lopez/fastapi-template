@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.14"
 dependencies = [
-    "alembic>=1.17.0",
+    "alembic>=1.18.5",
     "asyncpg>=0.30.0",
     "bcrypt>=5.0.0",
     "dependency-injector>=4.49.1",
@@ -19,7 +19,7 @@ dependencies = [
     "loguru>=0.7.3",
     "psutil>=7.1.1",
     "pydantic-settings>=2.14.2",
-    "redis>=6.4.0",
+    "redis>=8.0.1",
     "sqlalchemy>=2.0.51",
     "typer>=0.26.7",
 ]
@@ -34,10 +34,10 @@ packages = ["src"]
 dev = [
     "faker>=40.23.0",
     "pre-commit>=4.3.0",
-    "pytest>=9.1.0",
+    "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.15.18",
+    "ruff>=0.15.20",
 ]
 
 [tool.ruff]
