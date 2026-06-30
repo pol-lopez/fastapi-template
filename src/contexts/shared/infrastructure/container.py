@@ -22,8 +22,9 @@ class SharedContainer(containers.DeclarativeContainer):
         url=settings.database_url,
         echo=False,
         pool_pre_ping=True,
-        pool_size=5,
-        max_overflow=10,
+        pool_size=settings.database_pool_size,
+        max_overflow=settings.database_max_overflow,
+        connect_args={"command_timeout": settings.database_command_timeout},
     )
 
     session_factory = providers.Singleton(
