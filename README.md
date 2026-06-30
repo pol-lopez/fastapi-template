@@ -10,9 +10,9 @@ A production-ready FastAPI template implementing Domain-Driven Design (DDD) and 
 - **REST API**: User management endpoints (`/api/v1/auth/users`) with cursor-based pagination
 - **CLI Commands**: Typer-based administrative CLI for user and API key management
 - **Domain Events**: Synchronous in-process event bus with subscriber pattern
-- **Rate Limiting**: Sliding window rate limiter middleware (per-IP, configurable)
+- **Rate Limiting**: Redis-backed fixed-window rate limiter (per-IP, **shared across workers and replicas**, configurable, fails open if Redis is down)
 - **Distributed Cache**: Redis-backed cache (`RedisCacheClient`) with graceful degradation; `InMemoryCacheClient` used as the test double
-- **Deep Health Check**: `/health` endpoint verifies database and Redis connectivity with latency reporting
+- **Health Checks**: `/health/live` (cheap liveness — process up, no deps) and `/health` (deep readiness — verifies database and Redis with latency reporting)
 - **Database Management**:
   - PostgreSQL 18 with async SQLAlchemy
   - Alembic for database migrations
@@ -28,6 +28,8 @@ A production-ready FastAPI template implementing Domain-Driven Design (DDD) and 
   - Multi-stage Docker builds
   - Non-root user execution
   - Hot reload in development
+  - Gunicorn + Uvicorn workers in production (workers default to one per CPU core, override with `WEB_CONCURRENCY`)
+  - `uvloop` + `httptools` event loop for higher throughput
 
 ## 📋 Requirements
 
