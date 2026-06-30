@@ -49,13 +49,27 @@ class Settings(BaseSettings):
         description="Rate limit window duration in seconds",
     )
     rate_limit_exclude_paths: list[str] = Field(
-        default=["/health"],
+        default=["/health", "/health/live"],
         description="Paths excluded from rate limiting",
     )
 
     # Database Settings
     database_url: str = Field(
         description="Database connection URL",
+    )
+    database_pool_size: int = Field(
+        default=5,
+        description="Persistent connections per worker. "
+        "Keep workers * (pool_size + max_overflow) <= Postgres max_connections.",
+    )
+    database_max_overflow: int = Field(
+        default=10,
+        description="Extra burst connections per worker beyond pool_size.",
+    )
+    database_command_timeout: float | None = Field(
+        default=30.0,
+        description="Per-query timeout (seconds) for asyncpg; None disables it. "
+        "Stops a runaway query from pinning a pool connection.",
     )
 
     # Redis Settings

@@ -7,6 +7,10 @@ services:
         INSTALL_DEV: "true"
     env_file:
       - ./secrets/.env
+    environment:
+      # Reach the redis service by name (secrets default REDIS_URL to localhost
+      # for non-Docker local runs).
+      REDIS_URL: redis://redis:6379/0
     ports:
       - "${APP_HOST_PORT:-8080}:80"
     restart: unless-stopped
@@ -15,7 +19,7 @@ services:
       - ./tests:/app/tests:ro
       - ./scripts:/app/scripts:ro
       - ./migrations:/app/migrations
-    entrypoint: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--no-access-log"]
+    entrypoint: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--no-access-log", "--loop", "uvloop", "--http", "httptools"]
     depends_on:
       database:
         condition: service_healthy

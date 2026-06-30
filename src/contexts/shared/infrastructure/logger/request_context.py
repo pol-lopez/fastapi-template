@@ -13,10 +13,9 @@ def init_context(**fields: object) -> Token[dict[str, object] | None]:
 
 
 def bind_context(**fields: object) -> None:
-    # Mutate in place — never reassign the ContextVar mid-request. The middleware
-    # seeds the dict; downstream layers running in BaseHTTPMiddleware child tasks
-    # (which get their own ContextVar copy) add to the same object, so the middleware
-    # still sees their fields at emit time. Reassigning here would break that.
+    # Accumulate into the request-scoped context dict. The ASGI logging middleware
+    # seeds it and reads it at emit time; endpoints and dependencies add to it in
+    # between, on the same task, so the ContextVar propagates naturally.
     context = _request_context.get()
     if context is None:
         return

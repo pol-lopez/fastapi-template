@@ -42,3 +42,15 @@ class RedisCacheClient(CacheClient):
                 await self._client.delete(redis_key)
         except RedisError as exc:
             logger.warning("Redis clear failed: {}", exc)
+
+    async def increment(self, key: str, ttl: int) -> int:
+        try:
+            namespaced = self._namespaced(key)
+            async with self._client.pipeline(transaction=True) as pipe:
+                pipe.incr(namespaced)
+                pipe.expire(namespaced, ttl, nx=True)
+                results = await pipe.execute()
+            return int(results[0])
+        except RedisError as exc:
+            logger.warning("Redis increment failed for key {}: {}", key, exc)
+            return 0

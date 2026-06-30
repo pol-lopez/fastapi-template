@@ -48,3 +48,5 @@ ENV PATH="/app/.venv/bin:$PATH" \
 USER app
 
 EXPOSE 80
+
+CMD ["gunicorn", "src.main:app", "-k", "uvicorn_worker.UvicornWorker", "-b", "0.0.0.0:80", "-c", "gunicorn.conf.py"]

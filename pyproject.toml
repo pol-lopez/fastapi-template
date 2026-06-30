@@ -16,12 +16,14 @@ dependencies = [
     "dependency-injector>=4.49.1",
     "fastapi[standard]>=0.138.1",
     "greenlet>=3.5.2",
+    "gunicorn>=26.0.0",
     "loguru>=0.7.3",
     "psutil>=7.1.1",
     "pydantic-settings>=2.14.2",
     "redis>=8.0.1",
     "sqlalchemy>=2.0.51",
     "typer>=0.26.7",
+    "uvicorn-worker>=0.4.0",
 ]
 
 [project.scripts]

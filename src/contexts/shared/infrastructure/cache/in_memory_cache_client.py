@@ -31,3 +31,16 @@ class InMemoryCacheClient(CacheClient):
     async def clear(self) -> None:
         async with self._lock:
             self._cache.clear()
+
+    async def increment(self, key: str, ttl: int) -> int:
+        async with self._lock:
+            now = datetime.now(tz=UTC).timestamp()
+            item = self._cache.get(key)
+            if item and item[1] > now:
+                count = int(item[0]) + 1
+                expires_at = item[1]
+            else:
+                count = 1
+                expires_at = (datetime.now(tz=UTC) + timedelta(seconds=ttl)).timestamp()
+            self._cache[key] = (str(count), expires_at)
+            return count

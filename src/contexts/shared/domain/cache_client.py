@@ -13,3 +13,12 @@ class CacheClient(ABC):
 
     @abstractmethod
     async def clear(self) -> None: ...
+
+    @abstractmethod
+    async def increment(self, key: str, ttl: int) -> int:
+        """Atomically increment the counter at key, returning the new value.
+
+        The ttl is applied only when the counter is first created, so the window
+        is anchored to the first increment (fixed window).
+        """
+        ...
