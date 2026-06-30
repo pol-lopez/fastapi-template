@@ -15,7 +15,7 @@ services:
       - ./tests:/app/tests:ro
       - ./scripts:/app/scripts:ro
       - ./migrations:/app/migrations
-    entrypoint: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--no-access-log"]
+    entrypoint: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--no-access-log", "--loop", "uvloop", "--http", "httptools"]
     depends_on:
       database:
         condition: service_healthy
