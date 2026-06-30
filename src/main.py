@@ -19,7 +19,7 @@ from src.contexts.shared.infrastructure.http.exception_handlers import (
     register_exception_handlers,
 )
 from src.contexts.shared.infrastructure.http.rate_limit_middleware import (
-    create_rate_limit_middleware,
+    RateLimitMiddleware,
 )
 from src.contexts.shared.infrastructure.logger import setup_logger
 from src.settings import settings
@@ -56,15 +56,21 @@ app = FastAPI(
 setup_logger(app)
 register_exception_handlers(app)
 
-app.middleware("http")(
-    create_rate_limit_middleware(
-        max_requests=settings.rate_limit_requests,
-        window_seconds=settings.rate_limit_window_seconds,
-        exclude_paths=settings.rate_limit_exclude_paths,
-    )
+app.add_middleware(
+    RateLimitMiddleware,
+    cache_provider=container.shared_container.cache_client,
+    max_requests=settings.rate_limit_requests,
+    window_seconds=settings.rate_limit_window_seconds,
+    exclude_paths=settings.rate_limit_exclude_paths,
 )
 
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
+
+
+@app.get("/health/live", tags=["Health"])
+@public
+async def read_liveness() -> dict[str, str]:
+    return {"status": "alive"}
 
 
 @app.get("/health", tags=["Health"])

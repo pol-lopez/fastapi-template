@@ -7,7 +7,7 @@ from loguru import logger
 
 from src.settings import settings
 
-from .middleware import log_requests
+from .middleware import RequestLoggingMiddleware
 from .request_context import context_patcher
 
 _CONSOLE_FORMAT = (
@@ -102,4 +102,4 @@ def configure_loguru(
 
 def setup_logger(app: FastAPI) -> None:
     configure_loguru()
-    app.middleware("http")(log_requests)
+    app.add_middleware(RequestLoggingMiddleware)

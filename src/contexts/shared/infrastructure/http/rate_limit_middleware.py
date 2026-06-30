@@ -1,82 +1,98 @@
 import time
-from collections import defaultdict
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
+from dataclasses import dataclass
 
-from fastapi import Request, Response
 from fastapi.responses import JSONResponse
+from starlette.datastructures import MutableHeaders
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
+
+from src.contexts.shared.domain.cache_client import CacheClient
 
 
-class SlidingWindowRateLimiter:
-    def __init__(self, max_requests: int, window_seconds: float) -> None:
+@dataclass(frozen=True)
+class RateLimitDecision:
+    allowed: bool
+    remaining: int
+    reset_at: int
+    retry_after: int
+
+
+class RateLimiter:
+    """Fixed-window rate limiter backed by a shared CacheClient.
+
+    The counter lives in the cache (Redis in production), so the limit is shared
+    across gunicorn workers and replicas — an in-memory per-process counter would
+    let each worker allow the full quota independently.
+    """
+
+    def __init__(
+        self, cache: CacheClient, max_requests: int, window_seconds: int
+    ) -> None:
+        self._cache = cache
         self._max_requests = max_requests
         self._window_seconds = window_seconds
-        self._timestamps: dict[str, list[float]] = defaultdict(list)
 
-    def _cleanup(self, client_id: str) -> None:
-        cutoff = time.time() - self._window_seconds
-        self._timestamps[client_id] = [
-            ts for ts in self._timestamps[client_id] if ts > cutoff
-        ]
-        if not self._timestamps[client_id]:
-            del self._timestamps[client_id]
-
-    def is_allowed(self, client_id: str) -> bool:
-        self._cleanup(client_id)
-        if len(self._timestamps[client_id]) < self._max_requests:
-            self._timestamps[client_id].append(time.time())
-            return True
-        return False
-
-    def remaining(self, client_id: str) -> int:
-        self._cleanup(client_id)
-        return max(0, self._max_requests - len(self._timestamps.get(client_id, [])))
-
-    def reset_time(self, client_id: str) -> float:
-        self._cleanup(client_id)
-        timestamps = self._timestamps.get(client_id, [])
-        if not timestamps:
-            return time.time() + self._window_seconds
-        return timestamps[0] + self._window_seconds
+    async def hit(self, client_id: str) -> RateLimitDecision:
+        count = await self._cache.increment(
+            f"ratelimit:{client_id}", ttl=self._window_seconds
+        )
+        # count == 0 means the cache failed (degraded) — fail open.
+        allowed = count == 0 or count <= self._max_requests
+        return RateLimitDecision(
+            allowed=allowed,
+            remaining=max(0, self._max_requests - count),
+            reset_at=int(time.time()) + self._window_seconds,
+            retry_after=self._window_seconds,
+        )
 
 
-def create_rate_limit_middleware(
-    max_requests: int,
-    window_seconds: float,
-    exclude_paths: list[str],
-) -> Callable[[Request, Callable[[Request], Awaitable[Response]]], Awaitable[Response]]:
-    limiter = SlidingWindowRateLimiter(
-        max_requests=max_requests,
-        window_seconds=window_seconds,
-    )
+class RateLimitMiddleware:
+    def __init__(
+        self,
+        app: ASGIApp,
+        cache_provider: Callable[[], CacheClient],
+        max_requests: int,
+        window_seconds: int,
+        exclude_paths: list[str],
+    ) -> None:
+        self.app = app
+        self._cache_provider = cache_provider
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.exclude_paths = set(exclude_paths)
 
-    async def middleware(
-        request: Request,
-        call_next: Callable[[Request], Awaitable[Response]],
-    ) -> Response:
-        if request.url.path in exclude_paths:
-            return await call_next(request)
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http" or scope["path"] in self.exclude_paths:
+            await self.app(scope, receive, send)
+            return
 
-        client_id = request.client.host if request.client else "unknown"
+        client = scope.get("client")
+        client_id = client[0] if client else "unknown"
+        limiter = RateLimiter(
+            self._cache_provider(), self.max_requests, self.window_seconds
+        )
+        decision = await limiter.hit(client_id)
 
-        if not limiter.is_allowed(client_id):
-            reset = limiter.reset_time(client_id)
-            retry_after = max(0, int(reset - time.time()))
-            return JSONResponse(
+        if not decision.allowed:
+            response = JSONResponse(
                 status_code=429,
                 content={"detail": "Too Many Requests"},
                 headers={
-                    "Retry-After": str(retry_after),
-                    "X-RateLimit-Limit": str(max_requests),
+                    "Retry-After": str(decision.retry_after),
+                    "X-RateLimit-Limit": str(self.max_requests),
                     "X-RateLimit-Remaining": "0",
-                    "X-RateLimit-Reset": str(int(reset)),
+                    "X-RateLimit-Reset": str(decision.reset_at),
                 },
             )
+            await response(scope, receive, send)
+            return
 
-        response = await call_next(request)
-        reset = limiter.reset_time(client_id)
-        response.headers["X-RateLimit-Limit"] = str(max_requests)
-        response.headers["X-RateLimit-Remaining"] = str(limiter.remaining(client_id))
-        response.headers["X-RateLimit-Reset"] = str(int(reset))
-        return response
+        async def send_with_rate_limit_headers(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
+                headers["X-RateLimit-Limit"] = str(self.max_requests)
+                headers["X-RateLimit-Remaining"] = str(decision.remaining)
+                headers["X-RateLimit-Reset"] = str(decision.reset_at)
+            await send(message)
 
-    return middleware
+        await self.app(scope, receive, send_with_rate_limit_headers)
