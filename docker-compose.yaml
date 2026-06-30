@@ -7,6 +7,10 @@ services:
         INSTALL_DEV: "true"
     env_file:
       - ./secrets/.env
+    environment:
+      # Reach the redis service by name (secrets default REDIS_URL to localhost
+      # for non-Docker local runs).
+      REDIS_URL: redis://redis:6379/0
     ports:
       - "${APP_HOST_PORT:-8080}:80"
     restart: unless-stopped
