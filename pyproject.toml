@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.14"
 dependencies = [
-    "alembic>=1.18.5",
+    "alembic>=1.19.0",
     "asyncpg>=0.30.0",
     "bcrypt>=5.0.0",
     "dependency-injector>=4.49.1",
@@ -22,7 +22,7 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "redis>=8.1.0",
     "sqlalchemy>=2.0.51",
-    "typer>=0.27.0",
+    "typer>=0.27.1",
     "uvicorn-worker>=0.4.0",
 ]
 
