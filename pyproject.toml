@@ -16,7 +16,7 @@ dependencies = [
     "dependency-injector>=4.49.1",
     "fastapi[standard]>=0.141.1",
     "greenlet>=3.5.5",
-    "gunicorn>=26.1.0",
+    "gunicorn>=26.2.0",
     "loguru>=0.7.3",
     "psutil>=7.1.1",
     "pydantic-settings>=2.15.0",
@@ -34,12 +34,12 @@ packages = ["src"]
 
 [dependency-groups]
 dev = [
-    "faker>=40.36.0",
+    "faker>=40.37.0",
     "pre-commit>=4.6.2",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.16.4",
+    "ruff>=0.16.5",
 ]
 
 [tool.ruff]
