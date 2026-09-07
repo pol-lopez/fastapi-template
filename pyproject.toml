@@ -22,7 +22,7 @@ dependencies = [
     "pydantic-settings>=2.15.0",
     "redis>=8.1.0",
     "sqlalchemy>=2.0.52",
-    "typer>=0.27.1",
+    "typer>=0.27.2",
     "uvicorn-worker>=0.4.0",
 ]
 
@@ -34,12 +34,12 @@ packages = ["src"]
 
 [dependency-groups]
 dev = [
-    "faker>=40.37.0",
+    "faker>=40.38.0",
     "pre-commit>=4.6.2",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.16.5",
+    "ruff>=0.16.6",
 ]
 
 [tool.ruff]
