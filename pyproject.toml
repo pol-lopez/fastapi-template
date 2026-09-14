@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.14"
 dependencies = [
-    "alembic>=1.19.1",
+    "alembic>=1.19.2",
     "asyncpg>=0.30.0",
     "bcrypt>=5.0.0",
     "dependency-injector>=4.49.1",
@@ -39,7 +39,7 @@ dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.16.6",
+    "ruff>=0.16.7",
 ]
 
 [tool.ruff]
