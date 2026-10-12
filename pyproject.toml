@@ -11,7 +11,7 @@ license = "MIT"
 requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.20.0",
-    "asyncpg>=0.30.0",
+    "asyncpg>=0.32.0",
     "bcrypt>=5.0.0",
     "dependency-injector>=4.49.1",
     "fastapi[standard]>=0.143.0",
@@ -21,8 +21,8 @@ dependencies = [
     "psutil>=7.1.1",
     "pydantic-settings>=2.15.0",
     "redis>=8.1.0",
-    "sqlalchemy>=2.1.2",
-    "typer>=0.27.2",
+    "sqlalchemy>=2.1.4",
+    "typer>=0.27.3",
     "uvicorn-worker>=0.4.0",
 ]
 
@@ -34,12 +34,12 @@ packages = ["src"]
 
 [dependency-groups]
 dev = [
-    "faker>=40.40.0",
+    "faker>=40.43.0",
     "pre-commit>=4.6.2",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.16.10",
+    "ruff>=0.17.0",
 ]
 
 [tool.ruff]
