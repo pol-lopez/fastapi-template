@@ -19,7 +19,7 @@ dependencies = [
     "gunicorn>=26.2.0",
     "loguru>=0.7.3",
     "psutil>=7.1.1",
-    "pydantic-settings>=2.15.0",
+    "pydantic-settings>=2.16.0",
     "redis>=8.1.0",
     "sqlalchemy>=2.1.4",
     "typer>=0.27.3",
@@ -35,11 +35,11 @@ packages = ["src"]
 [dependency-groups]
 dev = [
     "faker>=40.43.0",
-    "pre-commit>=4.6.2",
+    "pre-commit>=4.7.0",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.17.0",
+    "ruff>=0.17.1",
 ]
 
 [tool.ruff]
