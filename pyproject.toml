@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.14"
 dependencies = [
-    "alembic>=1.20.0",
+    "alembic>=1.20.1",
     "asyncpg>=0.32.0",
     "bcrypt>=5.0.0",
     "dependency-injector>=4.49.1",
@@ -19,9 +19,9 @@ dependencies = [
     "gunicorn>=26.2.0",
     "loguru>=0.7.3",
     "psutil>=7.1.1",
-    "pydantic-settings>=2.16.0",
+    "pydantic-settings>=2.16.1",
     "redis>=8.1.0",
-    "sqlalchemy>=2.1.4",
+    "sqlalchemy>=2.1.6",
     "typer>=0.27.3",
     "uvicorn-worker>=0.4.0",
 ]
@@ -39,7 +39,7 @@ dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.17.1",
+    "ruff>=0.17.2",
 ]
 
 [tool.ruff]
