@@ -21,7 +21,7 @@ dependencies = [
     "psutil>=7.1.1",
     "pydantic-settings>=2.16.2",
     "redis>=8.1.0",
-    "sqlalchemy>=2.1.6",
+    "sqlalchemy>=2.1.8",
     "typer>=0.27.3",
     "uvicorn-worker>=0.4.0",
 ]
@@ -39,7 +39,7 @@ dev = [
     "pytest>=9.2.0",
     "pytest-asyncio>=1.4.1.post1",
     "pytest-cov>=7.0.0",
-    "ruff>=0.17.3",
+    "ruff>=0.17.4",
 ]
 
 [tool.ruff]
