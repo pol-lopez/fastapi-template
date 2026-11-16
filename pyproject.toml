@@ -17,12 +17,12 @@ dependencies = [
     "fastapi[standard]>=0.162.0",
     "greenlet>=3.5.6",
     "gunicorn>=26.2.0",
-    "loguru>=0.7.3",
+    "loguru>=0.8.0",
     "psutil>=7.1.1",
     "pydantic-settings>=2.16.2",
     "redis>=8.1.0",
     "sqlalchemy>=2.1.8",
-    "typer>=0.27.3",
+    "typer>=0.29.1",
     "uvicorn-worker>=0.4.0",
 ]
 
@@ -34,12 +34,12 @@ packages = ["src"]
 
 [dependency-groups]
 dev = [
-    "faker>=40.44.0",
+    "faker>=40.54.0",
     "pre-commit>=4.7.0",
     "pytest>=9.2.0",
-    "pytest-asyncio>=1.4.1.post1",
+    "pytest-asyncio>=1.5.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.17.4",
+    "ruff>=0.17.5",
 ]
 
 [tool.ruff]
