@@ -19,10 +19,10 @@ dependencies = [
     "gunicorn>=26.2.0",
     "loguru>=0.8.0",
     "psutil>=7.1.1",
-    "pydantic-settings>=2.16.2",
+    "pydantic-settings>=2.16.3",
     "redis>=8.1.0",
-    "sqlalchemy>=2.1.8",
-    "typer>=0.29.1",
+    "sqlalchemy>=2.1.9",
+    "typer>=0.29.2",
     "uvicorn-worker>=0.4.0",
 ]
 
@@ -39,7 +39,7 @@ dev = [
     "pytest>=9.2.0",
     "pytest-asyncio>=1.5.0",
     "pytest-cov>=7.0.0",
-    "ruff>=0.17.5",
+    "ruff>=0.17.6",
 ]
 
 [tool.ruff]
